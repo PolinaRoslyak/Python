@@ -1,0 +1,45 @@
+#Дан набор предложений, скопированных с Википедии. Каждое из них имеет "кошачью тему" в одном из трех смыслов:
+
+#кошки (животные)
+#UNIX-утилита cat для вывода содержимого файлов
+#версии операционной системы OS X, названные в честь семейства кошачьих
+#Ваша задача — найти два предложения, которые ближе всего по смыслу к расположенному в самой первой строке. 
+#В качестве меры близости по смыслу мы будем использовать косинусное расстояние.
+
+import re
+import numpy as np
+from scipy import spatial as sp
+
+words = []
+spl_words = list()
+
+file_obj = open("sentences.txt")
+
+for line in file_obj:
+    line = line.lower().replace('.', '').rstrip()
+    line = re.split('[^a-z]', line)
+    spl_words.append(line)
+    
+    for word in line:
+        if word not in words:
+            words.append(word)
+           
+d_list = (i for i in range(len(words)))
+my_dict = dict(zip(d_list, words))
+
+
+matrix = np.zeros((len(spl_words),len(my_dict)))
+
+for n in range(len(spl_words)):
+    for m in range(len(my_dict)):
+        matrix[n, m] = int(spl_words[n].count(my_dict[m]))
+
+min1 = (0, 1) 
+min2 = (0, 1)
+shape = matrix.shape
+for i in range(1, shape[0]):
+    cosin = sp.distance.cosine(matrix[0], matrix[i])
+    if (cosin < min1[1]):
+        min2 = min1
+        min1 = (i, cosin)
+print(min1, min2)
